@@ -12,16 +12,15 @@ var error = function (boldStatement) {
 }
 
 try {
-  fibrousPath = require.resolve("fibrous");
+  var fibrousPath = require.resolve("fibrous");
 } catch (e) {
   error();
   throw e;
 }
 
-// TODO: Make this less fragile and not assume things about the 
-// way the system is setup
-//if (fibrousPath != "/usr/local/lib/node_modules/fibrous/lib/fibrous.js") {
-if (!/\/usr\/.*\/fibrous.js/.test(fibrousPath)) {
+var npm = require("npm");
+npm.load()
+if (fibrousPath.indexOf(npm.globalDir) !== 0) {
   error();
   throw new Error("Refusing to use local fibrous install");
 }
