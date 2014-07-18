@@ -1,6 +1,6 @@
 var chalk = require("chalk");
 
-var error = function (boldStatement) {
+function error(boldStatement) {
   console.error(chalk.red("You must have fibrous installed *globally and not locally* to use this module"));
   console.error("    " + "      " + " npm uninstall fibrous");
   console.error("    " + chalk.grey("[sudo]") + " npm install -g fibrous");
@@ -11,6 +11,22 @@ var error = function (boldStatement) {
   console.error("");
 }
 
+function isGlobalPath(modulePath) {
+  if (!process.env.NODE_PATH) {
+    return false;
+  }
+
+  var path = require("path");
+  var nodePaths = process.env.NODE_PATH.split(path.delimiter);
+  return nodePaths.some(function(nodePath) {
+    nodePath = nodePath.trim()
+    if (!nodePath) {
+      return false;
+    }
+    return modulePath.indexOf(nodePath) === 0;
+  });
+}
+
 try {
   var fibrousPath = require.resolve("fibrous");
 } catch (e) {
@@ -18,9 +34,7 @@ try {
   throw e;
 }
 
-var npm = require("npm");
-npm.load()
-if (fibrousPath.indexOf(npm.globalDir) !== 0) {
+if (!isGlobalPath(fibrousPath)) {
   error();
   throw new Error("Refusing to use local fibrous install");
 }
